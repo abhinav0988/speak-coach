@@ -35,12 +35,14 @@
       "new_sqlite_classes": ["CoachRoomDO"]
     }
   ],
-  // Production secrets:
-  //   npx wrangler secret put JWT_SECRET          (required — HS256 for access + WS JWTs)
-  //   npx wrangler secret put RESEND_API_KEY      (optional — OTP email)
-  //   npx wrangler secret put TURNSTILE_SECRET_KEY (optional)
-  //   npx wrangler secret put AUTH_DEV_EXPOSE_OTP (optional — value "true"; dev/smoke OTP in JSON only)
-  // Local: copy .dev.vars.example to .dev.vars
+  // NEVER put secrets in this file (no JWT_SECRET, API keys, passwords).
+  // Production secrets live only in Cloudflare (encrypted), set with:
+  //   npx wrangler secret put JWT_SECRET
+  //   npx wrangler secret put RESEND_API_KEY
+  //   npx wrangler secret put EMAIL_FROM
+  //   npx wrangler secret put TURNSTILE_SECRET_KEY
+  //   npx wrangler secret put AUTH_DEV_EXPOSE_OTP
+  // Local secrets: workers/api/.dev.vars  (gitignored — copy from .dev.vars.example)
   "observability": {
     "enabled": true
   },
