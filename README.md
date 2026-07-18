@@ -187,9 +187,11 @@ npx wrangler login
 npx wrangler d1 create speak-coach
 npx wrangler r2 bucket create speak-coach-voice
 
-# 2. Update database_id in workers/api/wrangler.jsonc
+# 2. Local Wrangler config (gitignored — keeps account/D1 IDs off GitHub)
+cp workers/api/wrangler.jsonc.example workers/api/wrangler.jsonc
+# Paste database_id from: npx wrangler d1 create speak-coach
 
-# 3. Set secrets (Worker only — never in the web bundle)
+# 3. Set secrets (Worker only — never in the web bundle / never commit .dev.vars)
 cd workers/api && npx wrangler secret put JWT_SECRET
 # Optional: npx wrangler secret put RESEND_API_KEY
 

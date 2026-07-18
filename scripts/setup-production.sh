@@ -14,10 +14,10 @@ echo "Step 1: Login to Cloudflare"
 echo "  npx wrangler login"
 echo ""
 
-echo "Step 2: Create D1 database (already created)"
-echo "  Database: speak-coach"
-echo "  ID: 07536dc7-b59c-4320-bc2f-faabca36caae"
-echo "  → Already set in workers/api/wrangler.jsonc"
+echo "Step 2: Create D1 database (if needed)"
+echo "  npx wrangler d1 create speak-coach"
+echo "  → Copy workers/api/wrangler.jsonc.example → wrangler.jsonc"
+echo "  → Paste the database_id into workers/api/wrangler.jsonc (gitignored)"
 echo ""
 
 echo "Step 3: Create R2 bucket"
@@ -49,16 +49,12 @@ echo "  cd apps/mobile && eas init   # sets real projectId in app.json"
 echo "  EXPO_PUBLIC_API_URL=https://... eas build --profile preview"
 echo ""
 
-if grep -q "local-speak-coach-db" workers/api/wrangler.jsonc 2>/dev/null; then
+if [ ! -f workers/api/wrangler.jsonc ]; then
+  echo "⚠️  Missing workers/api/wrangler.jsonc — copy from wrangler.jsonc.example and set database_id"
+elif grep -qE 'YOUR_D1_DATABASE_ID|local-speak-coach-db' workers/api/wrangler.jsonc 2>/dev/null; then
   echo "⚠️  wrangler.jsonc still has placeholder database_id — update before remote deploy"
 else
   echo "✅ wrangler.jsonc database_id configured (speak-coach)"
-fi
-
-if grep -q '"account_id"' workers/api/wrangler.jsonc 2>/dev/null; then
-  echo "✅ wrangler.jsonc account_id configured"
-else
-  echo "⚠️  wrangler.jsonc missing account_id"
 fi
 
 echo ""

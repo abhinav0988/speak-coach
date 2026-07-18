@@ -5,6 +5,11 @@ out
 dist
 .turbo
 .wrangler
+**/.wrangler/
+*.tsbuildinfo
+
+# Local Wrangler config with account / D1 IDs — NEVER commit
+workers/api/wrangler.jsonc
 
 # Local secrets — NEVER commit these
 .dev.vars
@@ -27,6 +32,7 @@ playwright-report
 blob-report
 apps/web/test-results
 apps/web/playwright-report
+apps/web/out
 
 # Editor
 .idea

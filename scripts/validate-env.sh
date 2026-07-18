@@ -25,17 +25,12 @@ check_var NEXT_PUBLIC_API_URL true
 
 echo "ℹ️  Production API auth: cd workers/api && npx wrangler secret put JWT_SECRET"
 
-if [ -f "workers/api/wrangler.jsonc" ]; then
-  if grep -q "local-speak-coach-db" workers/api/wrangler.jsonc; then
-    echo "⚠️  wrangler.jsonc still has placeholder database_id — update before remote deploy"
-  else
-    echo "✅ wrangler.jsonc database_id configured"
-  fi
-  if grep -q '"account_id"' workers/api/wrangler.jsonc; then
-    echo "✅ wrangler.jsonc account_id configured"
-  else
-    echo "⚠️  wrangler.jsonc missing account_id"
-  fi
+if [ ! -f "workers/api/wrangler.jsonc" ]; then
+  echo "⚠️  Missing workers/api/wrangler.jsonc — copy from wrangler.jsonc.example (file is gitignored)"
+elif grep -qE 'YOUR_D1_DATABASE_ID|local-speak-coach-db' workers/api/wrangler.jsonc; then
+  echo "⚠️  wrangler.jsonc still has placeholder database_id — update before remote deploy"
+else
+  echo "✅ wrangler.jsonc database_id configured"
 fi
 
 if [ -f "apps/web/public/icon-192.png" ] && [ -f "apps/web/public/icon-512.png" ]; then

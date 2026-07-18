@@ -2,14 +2,16 @@
   "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "speak-coach-api",
   "main": "src/index.ts",
-  "account_id": "3ee25fc8fe5e195ebf2e54da536e2d62",
+  // Optional — usually inferred from `npx wrangler login`
+  // "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
   "compatibility_date": "2025-06-01",
   "compatibility_flags": ["nodejs_compat"],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "speak-coach",
-      "database_id": "efa74e81-0ccb-43a2-8384-5e6fdc4951f3"
+      // From: npx wrangler d1 create speak-coach
+      "database_id": "YOUR_D1_DATABASE_ID"
     }
   ],
   "r2_buckets": [
