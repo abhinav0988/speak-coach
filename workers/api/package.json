@@ -1,0 +1,30 @@
+{
+  "name": "@speak-coach/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply speak-coach --local",
+    "db:migrate:remote": "wrangler d1 migrations apply speak-coach --remote",
+    "db:seed": "wrangler d1 execute speak-coach --local --file=./src/db/seed.sql && wrangler d1 execute speak-coach --local --file=./src/db/seed_phase6.sql && wrangler d1 execute speak-coach --local --file=./src/db/seed_phase15.sql",
+    "db:seed:generate": "node --experimental-strip-types scripts/generate-curriculum-seed.ts",
+    "db:seed:remote": "wrangler d1 execute speak-coach --remote --file=./src/db/seed.sql && wrangler d1 execute speak-coach --remote --file=./src/db/seed_phase6.sql && wrangler d1 execute speak-coach --remote --file=./src/db/seed_phase15.sql"
+  },
+  "dependencies": {
+    "@speak-coach/shared": "*",
+    "hono": "^4.7.4",
+    "jose": "^6.2.3",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250317.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.0",
+    "wrangler": "^4.14.0"
+  }
+}

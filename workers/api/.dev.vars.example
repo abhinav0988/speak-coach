@@ -1,0 +1,17 @@
+# Required — HS256 secret for access + WebSocket JWTs
+JWT_SECRET=dev-jwt-secret-change-me-in-production
+
+# Optional — expose OTP in API responses when email is unavailable (local only)
+AUTH_DEV_EXPOSE_OTP=true
+
+# Optional — Resend for OTP / weekly emails
+# RESEND_API_KEY=
+# EMAIL_FROM=Speak Coach <onboarding@resend.dev>
+
+# Optional — Cloudflare Turnstile
+# TURNSTILE_SECRET_KEY=
+
+# Optional — Expo / web push
+# EXPO_ACCESS_TOKEN=
+# VAPID_PUBLIC_KEY=
+# VAPID_PRIVATE_KEY=

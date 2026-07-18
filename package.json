@@ -1,0 +1,57 @@
+{
+  "name": "speak-coach",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "workers/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @speak-coach/api\" \"npm run dev -w @speak-coach/web\"",
+    "start": "npm run dev",
+    "dev:api": "npm run dev -w @speak-coach/api",
+    "dev:web": "npm run dev -w @speak-coach/web",
+    "dev:web:clean": "bash scripts/dev-web-clean.sh",
+    "dev:mobile": "bash scripts/fix-mobile-deps.sh && npm run dev --prefix apps/mobile",
+    "build:mobile:preview": "npm run build:preview --prefix apps/mobile",
+    "build": "npm run build -w @speak-coach/web",
+    "deploy:api": "npm run deploy -w @speak-coach/api",
+    "deploy:pages": "npm run build && npm run pages:deploy -w @speak-coach/web",
+    "deploy:all": "bash scripts/deploy.sh",
+    "test": "npm run test -w @speak-coach/api && npm run test -w @speak-coach/web",
+    "test:web": "npm run test -w @speak-coach/web",
+    "test:worker": "npm run test -w @speak-coach/api",
+    "test:views": "npm run test:views -w @speak-coach/web",
+    "test:all": "npm run test:worker && npm run typecheck:worker && npm run test:web && npm run build && npm run test:views && npm run smoke && npm run smoke:full",
+    "typecheck:worker": "npm run typecheck -w @speak-coach/api",
+    "smoke": "bash scripts/smoke-test.sh",
+    "smoke:full": "node scripts/smoke-full.mjs",
+    "validate:env": "bash scripts/validate-env.sh",
+    "setup:production": "bash scripts/setup-production.sh",
+    "fix:mobile": "bash scripts/fix-mobile-deps.sh",
+    "db:migrate": "npm run db:migrate -w @speak-coach/api",
+    "db:migrate:remote": "npm run db:migrate:remote -w @speak-coach/api",
+    "db:seed": "npm run db:seed -w @speak-coach/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "overrides": {
+    "expo": "~52.0.49",
+    "@expo/metro-config": "0.19.12",
+    "metro": "0.81.5",
+    "metro-babel-transformer": "0.81.5",
+    "metro-cache": "0.81.5",
+    "metro-cache-key": "0.81.5",
+    "metro-config": "0.81.5",
+    "metro-core": "0.81.5",
+    "metro-file-map": "0.81.5",
+    "metro-minify-terser": "0.81.5",
+    "metro-resolver": "0.81.5",
+    "metro-runtime": "0.81.5",
+    "metro-source-map": "0.81.5",
+    "metro-symbolicate": "0.81.5",
+    "metro-transform-plugins": "0.81.5",
+    "metro-transform-worker": "0.81.5"
+  }
+}

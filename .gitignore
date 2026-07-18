@@ -1,0 +1,9 @@
+node_modules
+.next
+.wrangler
+.dev.vars
+dist
+*.log
+.env
+.env.local
+.turbo

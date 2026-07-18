@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck worker
+        run: npm run typecheck:worker
+      - name: Unit tests (worker)
+        run: npm run test:worker
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Unit tests (web)
+        run: npm run test:web
+      - name: Build web
+        run: npm run build
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - name: Viewport E2E
+        run: npm run test:views
+      - name: Lint
+        run: npm run lint -w @speak-coach/web
+        continue-on-error: true
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: [worker, frontend]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      # smoke-test.sh: public /api/health + 401 on protected routes (no secrets)
+      - name: Smoke (raw)
+        run: npm run smoke
+        env:
+          API_URL: https://speak-coach-api.blobforges.workers.dev
+      # smoke-full.mjs: email register/login; needs Worker JWT_SECRET + AUTH_DEV_EXPOSE_OTP=true for devOtp
+      - name: Smoke (full)
+        run: npm run smoke:full
+        env:
+          API_URL: https://speak-coach-api.blobforges.workers.dev
+          WEB_URL: https://speak-coach-3gw.pages.dev

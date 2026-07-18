@@ -1,0 +1,1574 @@
+{
+  "info": {
+    "name": "Speak Coach API",
+    "description": "Complete API collection for Speak Coach (email auth).\n\n**Setup:**\n1. Import environment `Speak-Coach-Local.postman_environment.json`\n2. Set `baseUrl` = http://localhost:8787\n3. Ensure `workers/api/.dev.vars` has `JWT_SECRET` and `AUTH_DEV_EXPOSE_OTP=true`\n4. Run **00 — Auth → Login** (or Register + Verify Email) before protected routes\n\n**Auth:** HttpOnly cookies (`sc_access`, `sc_refresh`) + `X-CSRF-Token` header from `{{csrfToken}}`. Postman stores cookies automatically. Optional: `Authorization: Bearer` with a JWT access token.\n\n**Multipart:** Voice/shadowing/roleplay/paragraph read need an audio file — pick any .webm/.wav in form-data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8787"
+    },
+    {
+      "key": "testEmail",
+      "value": "postman@example.com"
+    },
+    {
+      "key": "testPassword",
+      "value": "PostmanTest1!"
+    },
+    {
+      "key": "csrfToken",
+      "value": ""
+    },
+    {
+      "key": "otp",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 — Auth (run first)",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.devOtp) pm.collectionVariables.set('otp', j.devOtp);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman User\",\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\",\n  \"confirmPassword\": \"{{testPassword}}\"\n}"
+            },
+            "description": "Public. With AUTH_DEV_EXPOSE_OTP=true, saves devOtp to {{otp}}."
+          }
+        },
+        {
+          "name": "Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.csrfToken) pm.collectionVariables.set('csrfToken', j.csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/verify-email",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"otp\": \"{{otp}}\"\n}"
+            },
+            "description": "Public. Sets session cookies + csrfToken on success."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.csrfToken) pm.collectionVariables.set('csrfToken', j.csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}"
+            },
+            "description": "Public. Sets session cookies + csrfToken. Use after register/verify or for returning users."
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        },
+        {
+          "name": "Refresh Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j.csrfToken) pm.collectionVariables.set('csrfToken', j.csrfToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/logout",
+            "description": "Requires CSRF header (collection pre-request script)."
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"otp\": \"{{otp}}\",\n  \"password\": \"NewPostman1!\",\n  \"confirmPassword\": \"NewPostman1!\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Device Sessions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/auth/sessions"
+          }
+        },
+        {
+          "name": "WebSocket Token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/auth/ws-token",
+            "description": "Returns short-lived JWT for ?ws_token= on /api/coach/ws"
+          }
+        }
+      ]
+    },
+    {
+      "name": "01 — Public (no auth)",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/health",
+            "auth": {
+              "type": "noauth"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 — Profile",
+      "item": [
+        {
+          "name": "Get Profile + Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/profile",
+            "description": ""
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/profile",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Abhinav Kumar\",\n  \"email\": \"abhinav@example.com\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 — Dashboard & Journey",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/dashboard",
+            "description": ""
+          }
+        },
+        {
+          "name": "90-Day Journey",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/journey",
+            "description": ""
+          }
+        },
+        {
+          "name": "Curriculum Overview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/curriculum/overview",
+            "description": ""
+          }
+        },
+        {
+          "name": "Night Review",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/night-review",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 — Sessions",
+      "item": [
+        {
+          "name": "Create Today Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sessions",
+            "description": "Creates session + 10 steps if not exists. Save `id` to {{sessionId}}.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Get Today Session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/sessions/today",
+            "description": ""
+          }
+        },
+        {
+          "name": "Update Session Step",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}/step",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stepNumber\": 1,\n  \"status\": \"done\",\n  \"durationSec\": 120,\n  \"data\": {\n    \"note\": \"Completed motivation step\"\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Update Session Scores",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}/scores",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"motivation\": 8,\n  \"pronunciation\": 75,\n  \"romanHindi\": 80,\n  \"spokenEn\": 70,\n  \"spokenHi\": 72,\n  \"loudness\": 68,\n  \"clarity\": 74,\n  \"notes\": \"Good session today\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Assign Homework (via session)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sessions/{{sessionId}}/homework",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayNumber\": 5,\n  \"scores\": {\n    \"romanHindi\": 6,\n    \"loudness\": 5,\n    \"pronunciation\": 7\n  }\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 — Corrections",
+      "item": [
+        {
+          "name": "Correct Roman Hindi",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/correct/roman-hindi",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"main ghar pohach gya hu aur mujhe bahut khushi hai\",\n  \"sessionId\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Correct English",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/correct/english",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"I am go to office today and I have many works to do\",\n  \"sessionId\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Bulk Correct (WhatsApp)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/correct/bulk",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"main ghar pohach gya hu\\nI am go to office today\\nkya tumne khana khaya\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Correction History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/correct/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "correct",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Correction History (Roman Hindi only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/correct/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "correct",
+                "history"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "roman_hindi"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 — Paragraphs",
+      "item": [
+        {
+          "name": "Analyze Paragraph Write",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/paragraphs/write",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"main kal market gya tha aur maine bahut sari cheezein kharidi\",\n  \"language\": \"roman_hindi\",\n  \"sessionId\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Analyze Paragraph Write (English)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/paragraphs/write",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Yesterday I go to market and buy many thing for my family\",\n  \"language\": \"english\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Paragraph Writes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/paragraphs/writes",
+            "description": ""
+          }
+        },
+        {
+          "name": "Get Paragraph Write Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/paragraphs/writes/{{writeId}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Daily Paragraph",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/paragraphs/daily",
+            "description": ""
+          }
+        },
+        {
+          "name": "List Paragraph Reads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/paragraphs/reads",
+            "description": ""
+          }
+        },
+        {
+          "name": "Get Paragraph Read Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/paragraphs/reads/{{readId}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Submit Paragraph Read (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "sourceText",
+                  "value": "Main aaj subah jaldi utha aur exercise ki.",
+                  "type": "text"
+                },
+                {
+                  "key": "sourceLanguage",
+                  "value": "roman_hindi",
+                  "type": "text"
+                },
+                {
+                  "key": "transcript",
+                  "value": "Main aaj subah jaldi utha aur exercise ki.",
+                  "type": "text"
+                },
+                {
+                  "key": "sessionId",
+                  "value": "{{sessionId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "analytics",
+                  "value": "{\"loudnessScore\":72,\"clarityScore\":68,\"paceWpm\":120,\"pitchAvgHz\":145,\"pitchVarietyScore\":55,\"fillerCount\":1,\"speakingTimeMs\":15000,\"waveformSamples\":[20,45,60,55,40,70,65],\"sentences\":[]}",
+                  "type": "text"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "",
+                  "description": "Select a .webm or .wav file"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/paragraphs/read",
+            "description": "Attach audio file in form-data."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 — Voice",
+      "item": [
+        {
+          "name": "List Voice Recordings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/voice",
+            "description": ""
+          }
+        },
+        {
+          "name": "Voice Library",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voice/library",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "voice",
+                "library"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "all"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Voice Library (live_speak)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voice/library",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "voice",
+                "library"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "live_speak"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Unified Voice Timeline",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/voice/timeline",
+            "description": ""
+          }
+        },
+        {
+          "name": "Download Recording Audio",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/voice/{{recordingId}}/audio",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "voice",
+                "{{recordingId}}",
+                "audio"
+              ],
+              "query": [
+                {
+                  "key": "source",
+                  "value": "voice"
+                }
+              ]
+            },
+            "description": "source: voice | shadowing | paragraph"
+          }
+        },
+        {
+          "name": "Upload Voice Recording (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "",
+                  "description": "Required: audio file"
+                },
+                {
+                  "key": "transcript",
+                  "value": "Main aaj practice kar raha hoon aur improve ho raha hoon",
+                  "type": "text"
+                },
+                {
+                  "key": "language",
+                  "value": "mixed",
+                  "type": "text"
+                },
+                {
+                  "key": "category",
+                  "value": "practice",
+                  "type": "text",
+                  "description": "practice|live_speak|challenge|session|general"
+                },
+                {
+                  "key": "sessionId",
+                  "value": "{{sessionId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "analytics",
+                  "value": "{\"loudnessScore\":72,\"clarityScore\":68,\"paceWpm\":120,\"pitchAvgHz\":145,\"pitchVarietyScore\":55,\"fillerCount\":1,\"speakingTimeMs\":15000,\"waveformSamples\":[20,45,60,55,40,70,65],\"sentences\":[]}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/voice/upload"
+          }
+        },
+        {
+          "name": "Transcribe Audio Chunk (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/voice/transcribe-chunk"
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 — Shadowing",
+      "item": [
+        {
+          "name": "Today Shadowing Sentence",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/shadowing/sentence",
+            "description": ""
+          }
+        },
+        {
+          "name": "Shadowing History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/shadowing/history",
+            "description": ""
+          }
+        },
+        {
+          "name": "Submit Shadowing Attempt (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "referenceText",
+                  "value": "I think this is a good opportunity to practice.",
+                  "type": "text"
+                },
+                {
+                  "key": "transcript",
+                  "value": "I think this is a good opportunity to practice.",
+                  "type": "text"
+                },
+                {
+                  "key": "analytics",
+                  "value": "{\"loudnessScore\":72,\"clarityScore\":68,\"paceWpm\":120,\"pitchAvgHz\":145,\"pitchVarietyScore\":55,\"fillerCount\":1,\"speakingTimeMs\":15000,\"waveformSamples\":[20,45,60,55,40,70,65],\"sentences\":[]}",
+                  "type": "text"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/shadowing/attempt"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 — Roleplay",
+      "item": [
+        {
+          "name": "List Scenarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/roleplay/scenarios",
+            "description": ""
+          }
+        },
+        {
+          "name": "Get Scenario Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/roleplay/scenarios/{{scenarioId}}",
+            "description": "scenarioId: interview | shop | travel | work | friend"
+          }
+        },
+        {
+          "name": "Start Roleplay Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/roleplay/start",
+            "description": "Save sessionId from response to {{roleplaySessionId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"scenarioId\": \"interview\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Submit Roleplay Turn (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "sessionId",
+                  "value": "{{roleplaySessionId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "turnIndex",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "reply",
+                  "value": "Hello, my name is Abhinav and I am excited about this opportunity.",
+                  "type": "text"
+                },
+                {
+                  "key": "analytics",
+                  "value": "{\"loudnessScore\":72,\"clarityScore\":68,\"paceWpm\":120,\"pitchAvgHz\":145,\"pitchVarietyScore\":55,\"fillerCount\":1,\"speakingTimeMs\":15000,\"waveformSamples\":[20,45,60,55,40,70,65],\"sentences\":[]}",
+                  "type": "text"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/roleplay/turn",
+            "description": "Text reply works without audio. Enable audio field optionally."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 — Analytics & Reports",
+      "item": [
+        {
+          "name": "Analytics Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/analytics",
+            "description": ""
+          }
+        },
+        {
+          "name": "AI Analytics Insights",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/analytics/insights",
+            "description": ""
+          }
+        },
+        {
+          "name": "Weekly Report (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/reports/weekly",
+            "description": ""
+          }
+        },
+        {
+          "name": "Weekly Report (HTML)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/reports/weekly/html",
+            "description": ""
+          }
+        },
+        {
+          "name": "Email Weekly Report",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/reports/weekly/email",
+            "description": "Requires RESEND_API_KEY + email on profile.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 — Heatmaps",
+      "item": [
+        {
+          "name": "Mistake Heatmap (30 days)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/heatmap",
+            "description": ""
+          }
+        },
+        {
+          "name": "Practice Heatmap (12 weeks)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/practice-heatmap",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 — Sound Gym",
+      "item": [
+        {
+          "name": "Get Sound Gym Progress",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/sound-gym",
+            "description": ""
+          }
+        },
+        {
+          "name": "Complete Sound Gym Drill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/sound-gym/complete",
+            "description": "drillId: th | vw | ra | sha",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"drillId\": \"th\",\n  \"loudnessScore\": 75,\n  \"clarityScore\": 70\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 — Code Switch",
+      "item": [
+        {
+          "name": "Analyze Code Switch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/code-switch/analyze",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Main office ja raha hoon but traffic bahut zyada hai today\",\n  \"sessionId\": \"{{sessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Code Switch History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/code-switch/history",
+            "description": ""
+          }
+        },
+        {
+          "name": "Code Switch Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/code-switch/stats",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "14 — AI Coach",
+      "item": [
+        {
+          "name": "List Coach Sessions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/coach/sessions",
+            "description": ""
+          }
+        },
+        {
+          "name": "Get Coach Session Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/coach/sessions/{{coachSessionId}}",
+            "description": ""
+          }
+        },
+        {
+          "name": "Coach Chat",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/coach/chat",
+            "description": "Leave sessionId empty for new session. Save returned sessionId.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"How can I improve my pronunciation for TH sound?\",\n  \"sessionId\": \"{{coachSessionId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Coach Stream (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/coach/stream",
+            "description": "Returns text/event-stream.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Give me 3 tips to speak louder\",\n  \"sessionId\": \"{{coachSessionId}}\",\n  \"messages\": []\n}"
+            }
+          }
+        },
+        {
+          "name": "Coach WebSocket (info only)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/coach/ws",
+            "description": "WebSocket upgrade — use Postman WebSocket or browser. Not testable as REST."
+          }
+        }
+      ]
+    },
+    {
+      "name": "15 — Vocabulary",
+      "item": [
+        {
+          "name": "Today Vocabulary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vocabulary/today",
+            "description": ""
+          }
+        },
+        {
+          "name": "Due Words for Review",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/vocabulary/due",
+            "description": ""
+          }
+        },
+        {
+          "name": "Review Vocabulary Word",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/vocabulary/{{vocabId}}/review",
+            "description": "quality: known | learning | difficult",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quality\": \"known\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "16 — Mistakes",
+      "item": [
+        {
+          "name": "List Mistakes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/mistakes",
+            "description": ""
+          }
+        },
+        {
+          "name": "Add Mistake",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/mistakes",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"wrong\": \"pohach\",\n  \"correct\": \"pahunch\",\n  \"category\": \"roman_hindi\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "17 — Homework",
+      "item": [
+        {
+          "name": "Today Homework",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/homework/today",
+            "description": ""
+          }
+        },
+        {
+          "name": "List Homework",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/homework",
+            "description": ""
+          }
+        },
+        {
+          "name": "Assign Homework",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/homework/assign",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"{{sessionId}}\",\n  \"dayNumber\": 5,\n  \"scores\": {\n    \"romanHindi\": 6,\n    \"loudness\": 5,\n    \"pronunciation\": 7\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Complete Homework",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/homework/{{homeworkId}}/complete",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "18 — Journal & Phrases",
+      "item": [
+        {
+          "name": "List Journal Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/journal",
+            "description": ""
+          }
+        },
+        {
+          "name": "Today Journal Entry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/journal/today",
+            "description": ""
+          }
+        },
+        {
+          "name": "Save Journal Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/journal",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moodBefore\": 4,\n  \"moodAfter\": 7,\n  \"reflection\": \"Felt nervous at start but gained confidence after speaking practice.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "List Phrases",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/phrases",
+            "description": ""
+          }
+        },
+        {
+          "name": "List Phrases (by category)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/phrases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "phrases"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "grammar"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Save Phrase",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/phrases",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"original\": \"main ghar pohach gya\",\n  \"corrected\": \"main ghar pahunch gaya\",\n  \"language\": \"roman_hindi\",\n  \"category\": \"grammar\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Phrase",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/phrases/{{phraseId}}",
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "19 — Streak",
+      "item": [
+        {
+          "name": "Get Streak Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/streak",
+            "description": ""
+          }
+        },
+        {
+          "name": "Use Streak Freeze",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/streak/freeze",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "20 — Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/settings",
+            "description": ""
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/settings",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reminderEnabled\": true,\n  \"reminderTime\": \"09:00\",\n  \"devanagariPreferred\": false,\n  \"dailyGoalMinutes\": 20,\n  \"weeklyReportEmail\": true\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "21 — Push Notifications",
+      "item": [
+        {
+          "name": "Push Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/push/status",
+            "description": ""
+          }
+        },
+        {
+          "name": "VAPID Public Key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/push/vapid-public-key",
+            "description": ""
+          }
+        },
+        {
+          "name": "Register Expo Push Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/push/register",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\",\n  \"platform\": \"ios\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register Web Push Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/push/register",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform\": \"web\",\n  \"subscription\": {\n    \"endpoint\": \"https://fcm.googleapis.com/fcm/send/dummy-endpoint\",\n    \"keys\": {\n      \"p256dh\": \"dummy-p256dh-key\",\n      \"auth\": \"dummy-auth-key\"\n    }\n  }\n}"
+            }
+          }
+        },
+        {
+          "name": "Unregister Push Token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/push/register",
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "22 — Export",
+      "item": [
+        {
+          "name": "Export Full Backup (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/export/backup",
+            "description": ""
+          }
+        },
+        {
+          "name": "Export Progress Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/export/summary",
+            "description": ""
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const csrf = pm.collectionVariables.get('csrfToken') || pm.environment.get('csrfToken');",
+          "const method = pm.request.method.toUpperCase();",
+          "if (csrf && ['POST','PUT','PATCH','DELETE'].includes(method)) {",
+          "  pm.request.headers.upsert({ key: 'X-CSRF-Token', value: csrf });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@speak-coach/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bash scripts/dev-guard.sh",
+    "dev:clean": "bash scripts/dev-guard.sh --force",
+    "build": "next build",
+    "pages:deploy": "wrangler pages deploy out --project-name=speak-coach",
+    "start": "next start",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:views": "playwright test",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@speak-coach/shared": "*",
+    "framer-motion": "^12.42.1",
+    "lucide-react": "^1.22.0",
+    "next": "^15.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.9.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.0"
+  }
+}
