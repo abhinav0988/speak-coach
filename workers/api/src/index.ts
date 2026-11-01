@@ -36,6 +36,11 @@ import profile from "./routes/profile";
 import soundGym from "./routes/soundGym";
 import { authMiddleware } from "./middleware/auth";
 import { handleScheduled } from "./scheduled";
+import {
+  attachD1Budget,
+  d1BudgetRetryAfterSec,
+  isD1BudgetExemptPath,
+} from "./lib/d1Budget";
 
 const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
@@ -112,8 +117,38 @@ app.route("/api/profile", profile);
 app.route("/api/sound-gym", soundGym);
 
 const worker = {
-  fetch: app.fetch,
-  scheduled: handleScheduled,
+  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    const path = new URL(request.url).pathname;
+    if (isD1BudgetExemptPath(path)) return app.fetch(request, env, ctx);
+
+    const budget = attachD1Budget(env);
+    if (await budget.isOverHardLimit()) {
+      return Response.json(
+        { error: "Daily database read budget reached. Try again after UTC midnight." },
+        { status: 503, headers: { "Retry-After": String(d1BudgetRetryAfterSec()) } },
+      );
+    }
+    try {
+      return await app.fetch(request, budget.env, ctx);
+    } finally {
+      ctx.waitUntil(budget.flush());
+    }
+  },
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    const budget = attachD1Budget(env);
+    if (await budget.isOverSoftLimit()) {
+      console.warn("[d1-budget] soft limit reached — skipping speak scheduled jobs", {
+        softLimit: budget.softLimit,
+        usage: await budget.getUsage(),
+      });
+      return;
+    }
+    try {
+      await handleScheduled(event, budget.env, ctx);
+    } finally {
+      await budget.flush();
+    }
+  },
 };
 
 export default worker;

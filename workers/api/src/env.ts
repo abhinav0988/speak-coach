@@ -3,6 +3,8 @@ export interface Env {
   VOICE: R2Bucket;
   AI: Ai;
   COACH_ROOM: DurableObjectNamespace;
+  /** Daily D1 rows_read hard cap for this Worker (account free tier is 5M shared). */
+  D1_DAILY_ROWS_READ_LIMIT?: string;
   /** Required. HS256 secret for access + WS JWTs. */
   JWT_SECRET: string;
   /** Optional Resend API key for OTP / report emails. */
