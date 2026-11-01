@@ -20,6 +20,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { open: "never" }]],
   use: {
     baseURL: BASE_URL,
+    headless: process.env.PLAYWRIGHT_HEADED === "1" ? false : true,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     // Video needs Playwright's ffmpeg binary; keep off unless `npx playwright install ffmpeg` succeeds.

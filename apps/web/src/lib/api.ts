@@ -1,6 +1,7 @@
 "use client";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
+// Empty string = same-origin `/api` (Pages Functions / next rewrites / serve-out proxy).
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 const CSRF_KEY = "speak-coach-csrf";
 
 export type AuthUser = {

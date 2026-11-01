@@ -21,7 +21,14 @@ check_var() {
   fi
 }
 
-check_var NEXT_PUBLIC_API_URL true
+# Empty string is valid: client uses same-origin /api (Pages Function proxy).
+if [ -z "${NEXT_PUBLIC_API_URL+x}" ]; then
+  echo "⚠️  NEXT_PUBLIC_API_URL unset — deploy will use same-origin /api (recommended)"
+elif [ -z "$NEXT_PUBLIC_API_URL" ]; then
+  echo "✅ NEXT_PUBLIC_API_URL empty (same-origin /api)"
+else
+  echo "✅ NEXT_PUBLIC_API_URL is set"
+fi
 
 echo "ℹ️  Production API auth: cd workers/api && npx wrangler secret put JWT_SECRET"
 

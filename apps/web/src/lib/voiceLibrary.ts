@@ -2,7 +2,7 @@
 
 import type { VoiceLibrarySource, VoiceRecordingCategory } from "@speak-coach/shared";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export const VOICE_CATEGORY_META: Record<
   VoiceRecordingCategory,

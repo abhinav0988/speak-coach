@@ -57,10 +57,10 @@ jobs:
       - name: Smoke (raw)
         run: npm run smoke
         env:
-          API_URL: https://speak-coach-api.blobforges.workers.dev
+          API_URL: https://speak-coach-api.appsphere.workers.dev
       # smoke-full.mjs: email register/login; needs Worker JWT_SECRET + AUTH_DEV_EXPOSE_OTP=true for devOtp
       - name: Smoke (full)
         run: npm run smoke:full
         env:
-          API_URL: https://speak-coach-api.blobforges.workers.dev
-          WEB_URL: https://speak-coach-3gw.pages.dev
+          API_URL: https://speak-coach-api.appsphere.workers.dev
+          WEB_URL: https://speak-coach-web.pages.dev

@@ -1,10 +1,14 @@
-// Minimal static file server for the Next.js `out/` export (Playwright webServer).
+// Static file server for Next.js `out/` + same-origin `/api` proxy to local Worker.
+// Matches Cloudflare Pages Functions behavior so HttpOnly auth cookies work in Playwright.
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 
 const ROOT = join(process.cwd(), "out");
 const PORT = Number(process.env.PORT ?? 4321);
+const API_ORIGIN = process.env.API_ORIGIN ?? "http://127.0.0.1:8787";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -37,8 +41,41 @@ async function resolveFile(pathname) {
   return join(ROOT, "404.html");
 }
 
+function proxyApi(req, res) {
+  const target = new URL(req.url ?? "/", API_ORIGIN);
+  const isHttps = target.protocol === "https:";
+  const transport = isHttps ? httpsRequest : httpRequest;
+  const headers = { ...req.headers, host: target.host };
+  delete headers["accept-encoding"];
+
+  const upstream = transport(
+    {
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (isHttps ? 443 : 80),
+      path: target.pathname + target.search,
+      method: req.method,
+      headers,
+    },
+    (up) => {
+      res.writeHead(up.statusCode ?? 502, up.headers);
+      up.pipe(res);
+    }
+  );
+  upstream.on("error", (err) => {
+    res.writeHead(502, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: `API proxy failed: ${err.message}` }));
+  });
+  req.pipe(upstream);
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);
+  if (url.pathname === "/api" || url.pathname.startsWith("/api/")) {
+    proxyApi(req, res);
+    return;
+  }
+
   const file = await resolveFile(url.pathname === "/" ? "/index.html" : url.pathname);
   try {
     const body = await readFile(file);
@@ -51,5 +88,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`serve-out listening on http://localhost:${PORT}`);
+  console.log(`serve-out listening on http://localhost:${PORT} (API → ${API_ORIGIN})`);
 });

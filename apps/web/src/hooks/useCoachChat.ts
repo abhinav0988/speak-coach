@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { api, getCsrf } from "@/lib/api";
 import type { CoachMessage } from "@speak-coach/shared";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8787";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 function csrfHeaders(): Record<string, string> {
   const csrf = getCsrf();

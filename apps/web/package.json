@@ -6,7 +6,7 @@
     "dev": "bash scripts/dev-guard.sh",
     "dev:clean": "bash scripts/dev-guard.sh --force",
     "build": "next build",
-    "pages:deploy": "wrangler pages deploy out --project-name=speak-coach",
+    "pages:deploy": "wrangler pages deploy out --project-name=speak-coach-web",
     "start": "next start",
     "test": "vitest run",
     "test:watch": "vitest",

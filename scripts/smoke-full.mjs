@@ -3,8 +3,8 @@
  * Full smoke suite for Speak Coach email auth + API.
  * Env: API_URL, WEB_URL, SMOKE_EMAIL, SMOKE_PASSWORD
  */
-const API_URL = process.env.API_URL ?? "https://speak-coach-api.blobforges.workers.dev";
-const WEB_URL = process.env.WEB_URL ?? "https://speak-coach-3gw.pages.dev";
+const API_URL = process.env.API_URL ?? "https://speak-coach-api.appsphere.workers.dev";
+const WEB_URL = process.env.WEB_URL ?? "https://speak-coach-web.pages.dev";
 const EMAIL = process.env.SMOKE_EMAIL ?? `smoke_${Date.now()}@example.com`;
 const PASSWORD = process.env.SMOKE_PASSWORD ?? "SmokeTest1!";
 

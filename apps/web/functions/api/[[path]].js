@@ -10,7 +10,7 @@
  * in every browser (including Safari and incognito). WebSocket upgrades for
  * the coach are forwarded transparently.
  */
-const WORKER_ORIGIN = "https://speak-coach-api.blobforges.workers.dev";
+const WORKER_ORIGIN = "https://speak-coach-api.appsphere.workers.dev";
 
 export async function onRequest(context) {
   const { request } = context;

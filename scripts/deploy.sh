@@ -6,8 +6,14 @@ echo "=== Speak Coach Production Deploy (Phase 15) ==="
 # Validate env
 bash scripts/validate-env.sh
 
-API_URL="${NEXT_PUBLIC_API_URL:-https://speak-coach-api.workers.dev}"
-PAGES_PROJECT="${PAGES_PROJECT:-speak-coach}"
+# Same-origin Pages proxy is the production client path; smoke still hits the Worker URL.
+API_URL="${API_URL:-${NEXT_PUBLIC_API_URL:-https://speak-coach-api.appsphere.workers.dev}}"
+# Empty NEXT_PUBLIC_API_URL is intentional (relative /api via Pages Function).
+if [ -z "${NEXT_PUBLIC_API_URL+x}" ]; then
+  export NEXT_PUBLIC_API_URL=""
+fi
+PAGES_PROJECT="${PAGES_PROJECT:-speak-coach-web}"
+export CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-b3875f2c511adc2efc6107ff8e9badf2}"
 
 echo ""
 echo "Using API_URL=$API_URL"
